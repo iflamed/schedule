@@ -52,22 +52,7 @@ func (s *Scheduler) Call(t Task) {
 }
 
 func (s *Scheduler) CallFunc(fn TaskFunc) {
-	defer s.Timezone(time.UTC)
-	if !s.matchRule() {
-		return
-	}
-	atomic.AddInt32(&s.count, 1)
-	s.wg.Add(1)
-	go func() {
-		defer func() {
-			s.wg.Done()
-			atomic.AddInt32(&s.count, -1)
-			if r := recover(); r != nil {
-				log.Println("Recovering schedule task from panic:", r)
-			}
-		}()
-		fn(s.ctx)
-	}()
+	s.Call(NewDefaultTask(fn))
 }
 
 func (s *Scheduler) matchRule() bool {
