@@ -20,3 +20,12 @@ func NewDefaultTask(fn TaskFunc) *DefaultTask {
 func (d *DefaultTask) Run(ctx context.Context) {
 	d.fn(ctx)
 }
+
+type NextTick struct {
+	Year   int
+	Month  int
+	Day    int
+	Hour   int
+	Minute int
+	Omit   bool
+}
