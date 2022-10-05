@@ -18,6 +18,7 @@ type Scheduler struct {
 	wg       sync.WaitGroup
 	ctx      context.Context
 	Next     *NextTick
+	limit    *Limit
 	count    int32
 }
 
@@ -26,6 +27,8 @@ func NewScheduler(ctx context.Context, loc *time.Location) *Scheduler {
 		ctx:      ctx,
 		location: loc,
 		now:      time.Now().In(loc),
+		Next:     &NextTick{},
+		limit:    &Limit{},
 		count:    0,
 	}
 }
@@ -39,6 +42,9 @@ func (s *Scheduler) Timezone(loc *time.Location) *Scheduler {
 func (s *Scheduler) Call(t Task) {
 	defer s.Timezone(time.UTC)
 	if !s.isTimeMatched() {
+		return
+	}
+	if !s.checkLimit() {
 		return
 	}
 	atomic.AddInt32(&s.count, 1)
@@ -71,6 +77,63 @@ func (s *Scheduler) isTimeMatched() bool {
 		return true
 	}
 	return false
+}
+
+func (s *Scheduler) timeToMinutes(t string) (hour, minute int) {
+	var err error
+	hm := strings.Split(t, ":")
+	if len(hm) == 2 {
+		hour, err = strconv.Atoi(hm[0])
+		if err == nil {
+			minute, err = strconv.Atoi(hm[1])
+		}
+	}
+	if err != nil {
+		hour = 0
+		minute = 0
+		return
+	}
+	return
+}
+
+func (s *Scheduler) checkLimit() bool {
+	if len(s.limit.DaysOfWeek) > 0 {
+		var inDays bool
+		for _, day := range s.limit.DaysOfWeek {
+			if day == s.now.Weekday() {
+				inDays = true
+			}
+		}
+		if !inDays {
+			return false
+		}
+	}
+	var startMinute, endMinute int
+	var hour, minute int
+	if s.limit.StartTime != "" {
+		hour, minute = s.timeToMinutes(s.limit.StartTime)
+		startMinute = hour*2 + minute
+	}
+	if s.limit.EndTime != "" {
+		hour, minute = s.timeToMinutes(s.limit.EndTime)
+		endMinute = hour*2 + minute
+	}
+	if startMinute > endMinute {
+		temp := startMinute
+		startMinute = endMinute
+		endMinute = temp
+	}
+	minuteOffset := s.now.Hour()*60 + s.now.Minute()
+	if s.limit.IsBetween && (minuteOffset < startMinute || minuteOffset > endMinute) {
+		return false
+	} else if minuteOffset > startMinute && minuteOffset < endMinute {
+		return false
+	}
+
+	if s.limit.When != nil {
+		return s.limit.When(s.ctx)
+	}
+	return true
 }
 
 func (s *Scheduler) initNextTick() {
@@ -407,5 +470,106 @@ func (s *Scheduler) YearlyOn(m, d int, t string) *Scheduler {
 	if t != "" {
 		s.setNextTime([]string{t})
 	}
+	return s
+}
+
+func (s *Scheduler) Weekdays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Monday,
+		time.Tuesday,
+		time.Wednesday,
+		time.Thursday,
+		time.Friday,
+	)
+	return s
+}
+
+func (s *Scheduler) Weekends() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Saturday,
+		time.Sunday,
+	)
+	return s
+}
+
+func (s *Scheduler) Mondays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Monday,
+	)
+	return s
+}
+
+func (s *Scheduler) Tuesdays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Tuesday,
+	)
+	return s
+}
+
+func (s *Scheduler) Wednesdays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Wednesday,
+	)
+	return s
+}
+
+func (s *Scheduler) Thursdays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Thursday,
+	)
+	return s
+}
+
+func (s *Scheduler) Fridays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Friday,
+	)
+	return s
+}
+
+func (s *Scheduler) Saturdays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Saturday,
+	)
+	return s
+}
+
+func (s *Scheduler) Sundays() *Scheduler {
+	s.limit.DaysOfWeek = append(
+		s.limit.DaysOfWeek,
+		time.Sunday,
+	)
+	return s
+}
+
+func (s *Scheduler) Days(d ...time.Weekday) *Scheduler {
+	s.limit.DaysOfWeek = append(s.limit.DaysOfWeek, d...)
+	return s
+}
+
+func (s *Scheduler) Between(start, end string) *Scheduler {
+	s.limit.StartTime = start
+	s.limit.EndTime = end
+	s.limit.IsBetween = true
+	return s
+}
+
+func (s *Scheduler) UnlessBetween(start, end string) *Scheduler {
+	s.limit.StartTime = start
+	s.limit.EndTime = end
+	s.limit.IsBetween = false
+	return s
+}
+
+func (s *Scheduler) When(when WhenFunc) *Scheduler {
+	s.limit.When = when
 	return s
 }

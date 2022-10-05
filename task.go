@@ -1,13 +1,17 @@
 // Package schedule
 package schedule
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type Task interface {
 	Run(ctx context.Context)
 }
 
 type TaskFunc func(ctx context.Context)
+type WhenFunc func(ctx context.Context) bool
 
 type DefaultTask struct {
 	fn TaskFunc
@@ -28,4 +32,12 @@ type NextTick struct {
 	Hour   int
 	Minute int
 	Omit   bool
+}
+
+type Limit struct {
+	DaysOfWeek []time.Weekday
+	StartTime  string
+	EndTime    string
+	IsBetween  bool
+	When       WhenFunc
 }
