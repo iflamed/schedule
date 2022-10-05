@@ -91,7 +91,6 @@ func (s *Scheduler) timeToMinutes(t string) (hour, minute int) {
 	if err != nil {
 		hour = 0
 		minute = 0
-		return
 	}
 	return
 }
