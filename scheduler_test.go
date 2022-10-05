@@ -453,3 +453,108 @@ func TestScheduler_TwiceDaily(t *testing.T) {
 	assert.Equal(t, s.Next.Minute, 0)
 	assert.True(t, s.Next.Omit)
 }
+
+func TestScheduler_Weekly(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 17:00:00")
+	s.Weekly()
+	assert.Equal(t, s.Next.Day, 2)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+}
+
+func TestScheduler_WeeklyOn(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-04 17:00:00")
+	s.WeeklyOn(time.Tuesday, "16:10")
+	assert.Equal(t, s.Next.Day, 4)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+	s.WeeklyOn(time.Tuesday, "17:00")
+	assert.Equal(t, s.Next.Day, 4)
+	assert.Equal(t, s.Next.Hour, 17)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+}
+
+func TestScheduler_Monthly(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-01 00:00:00")
+	s.Monthly()
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 1)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-02 00:00:00")
+	s.Monthly()
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 1)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+}
+
+func TestScheduler_MonthlyOn(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-02 03:00:00")
+	s.MonthlyOn(2, "03:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 2)
+	assert.Equal(t, s.Next.Hour, 3)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+	s.MonthlyOn(3, "00:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 0)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+}
+
+func TestScheduler_TwiceMonthly(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-02 03:00:00")
+	s.TwiceMonthly(2, 3, "03:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 2)
+	assert.Equal(t, s.Next.Hour, 3)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-03 03:00:00")
+	s.TwiceMonthly(2, 3, "03:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 3)
+	assert.Equal(t, s.Next.Hour, 3)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-03 04:00:00")
+	s.TwiceMonthly(2, 3, "03:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 3)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+}
+
+func TestScheduler_LastDayOfMonth(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-02 03:00:00")
+	s.LastDayOfMonth("03:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 31)
+	assert.Equal(t, s.Next.Hour, 3)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-02 03:00:00")
+	s.LastDayOfMonth("02:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 31)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+}

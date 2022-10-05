@@ -344,19 +344,17 @@ func (s *Scheduler) Weekly() *Scheduler {
 	return s
 }
 
-func (s *Scheduler) WeeklyOn(d int, t string) *Scheduler {
-	now := carbon.Time2Carbon(s.now)
-	now = now.StartOfWeek()
+func (s *Scheduler) WeeklyOn(d time.Weekday, t string) *Scheduler {
 	s.Next = &NextTick{
-		Year:   now.Year(),
-		Month:  now.Month(),
+		Year:   s.now.Year(),
+		Month:  int(s.now.Month()),
 		Day:    0,
 		Hour:   0,
 		Minute: 0,
 		Omit:   true,
 	}
-	if now.DayOfWeek() == d {
-		s.Next.Day = now.Day()
+	if s.now.Weekday() == d {
+		s.Next.Day = s.now.Day()
 		s.setNextTime([]string{t})
 	}
 	return s
