@@ -30,7 +30,7 @@ func TestScheduler_isTimeMatched(t *testing.T) {
 	assert.False(t, s.isTimeMatched())
 	s.Next.Omit = false
 	assert.True(t, s.isTimeMatched())
-	s.Next.Minute = 0
+	s.Next.Minute = 60
 	assert.False(t, s.isTimeMatched())
 }
 
