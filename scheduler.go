@@ -111,11 +111,11 @@ func (s *Scheduler) checkLimit() bool {
 	var hour, minute int
 	if s.limit.StartTime != "" {
 		hour, minute = s.timeToMinutes(s.limit.StartTime)
-		startMinute = hour*2 + minute
+		startMinute = hour*60 + minute
 	}
 	if s.limit.EndTime != "" {
 		hour, minute = s.timeToMinutes(s.limit.EndTime)
-		endMinute = hour*2 + minute
+		endMinute = hour*60 + minute
 	}
 	if startMinute > endMinute {
 		temp := startMinute
@@ -125,7 +125,7 @@ func (s *Scheduler) checkLimit() bool {
 	minuteOffset := s.now.Hour()*60 + s.now.Minute()
 	if s.limit.IsBetween && (minuteOffset < startMinute || minuteOffset > endMinute) {
 		return false
-	} else if minuteOffset > startMinute && minuteOffset < endMinute {
+	} else if !s.limit.IsBetween && minuteOffset > startMinute && minuteOffset < endMinute {
 		return false
 	}
 
