@@ -558,3 +558,43 @@ func TestScheduler_LastDayOfMonth(t *testing.T) {
 	assert.Equal(t, s.Next.Minute, 0)
 	assert.True(t, s.Next.Omit)
 }
+
+func TestScheduler_Quarterly(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-10 03:00:00")
+	s.Quarterly()
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 1)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+}
+
+func TestScheduler_Yearly(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-10 03:00:00")
+	s.Yearly()
+	assert.Equal(t, s.Next.Month, 1)
+	assert.Equal(t, s.Next.Day, 1)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+}
+
+func TestScheduler_YearlyOn(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-10 03:00:00")
+	s.YearlyOn(10, 10, "03:00")
+	assert.Equal(t, s.Next.Month, 10)
+	assert.Equal(t, s.Next.Day, 10)
+	assert.Equal(t, s.Next.Hour, 3)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.False(t, s.Next.Omit)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-10 03:00:00")
+	s.YearlyOn(8, 9, "02:00")
+	assert.Equal(t, s.Next.Month, 0)
+	assert.Equal(t, s.Next.Day, 0)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+}

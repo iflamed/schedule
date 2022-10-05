@@ -438,9 +438,8 @@ func (s *Scheduler) Quarterly() *Scheduler {
 }
 
 func (s *Scheduler) Yearly() *Scheduler {
-	now := carbon.Time2Carbon(s.now)
 	s.Next = &NextTick{
-		Year:   now.Year(),
+		Year:   s.now.Year(),
 		Month:  1,
 		Day:    1,
 		Hour:   0,
@@ -457,6 +456,7 @@ func (s *Scheduler) YearlyOn(m, d int, t string) *Scheduler {
 		Day:    0,
 		Hour:   0,
 		Minute: 0,
+		Omit:   true,
 	}
 	month := now.Month()
 	day := now.Day()
