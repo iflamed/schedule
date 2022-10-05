@@ -237,7 +237,7 @@ func (s *Scheduler) EveryOddHour() *Scheduler {
 	s.initNextTick()
 	s.Next.Omit = true
 	hour := s.now.Hour()
-	if hour >= 1 && hour <= 23 && hour%2 == 0 {
+	if hour >= 1 && hour <= 23 && hour%2 != 0 {
 		s.Next.Hour = hour
 		s.Next.Omit = false
 	}
