@@ -313,6 +313,10 @@ func (s *Scheduler) setNextTime(t []string) {
 	}
 }
 
+func (s *Scheduler) At(t ...string) *Scheduler {
+	return s.DailyAt(t...)
+}
+
 func (s *Scheduler) DailyAt(t ...string) *Scheduler {
 	s.initNextTick()
 	s.Next.Hour = 0
@@ -322,11 +326,18 @@ func (s *Scheduler) DailyAt(t ...string) *Scheduler {
 	return s
 }
 
-func (s *Scheduler) TwiceDaily(t ...int) *Scheduler {
-	timeList := make([]string, 0, len(t))
-	for _, h := range t {
-		timeList = append(timeList, strconv.Itoa(h)+":00")
-	}
+func (s *Scheduler) TwiceDaily(first, second int) *Scheduler {
+	timeList := make([]string, 0, 2)
+	timeList = append(timeList, strconv.Itoa(first)+":00")
+	timeList = append(timeList, strconv.Itoa(second)+":00")
+	s.DailyAt(timeList...)
+	return s
+}
+
+func (s *Scheduler) TwiceDailyAt(first, second, offset int) *Scheduler {
+	timeList := make([]string, 0, 2)
+	timeList = append(timeList, strconv.Itoa(first)+":"+strconv.Itoa(offset))
+	timeList = append(timeList, strconv.Itoa(second)+":"+strconv.Itoa(offset))
 	s.DailyAt(timeList...)
 	return s
 }

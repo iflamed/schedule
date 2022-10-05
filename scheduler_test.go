@@ -435,6 +435,19 @@ func TestScheduler_DailyAt(t *testing.T) {
 	assert.True(t, s.Next.Omit)
 }
 
+func TestScheduler_At(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 17:01:00")
+	s.At("00:30", "17:01")
+	assert.Equal(t, s.Next.Hour, 17)
+	assert.Equal(t, s.Next.Minute, 1)
+	assert.False(t, s.Next.Omit)
+	s.At("00:30", "16:01")
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+}
+
 func TestScheduler_TwiceDaily(t *testing.T) {
 	s := NewScheduler(context.Background(), time.UTC)
 	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 17:00:00")
@@ -449,6 +462,25 @@ func TestScheduler_TwiceDaily(t *testing.T) {
 	assert.False(t, s.Next.Omit)
 	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 03:00:00")
 	s.TwiceDaily(1, 17)
+	assert.Equal(t, s.Next.Hour, 0)
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.True(t, s.Next.Omit)
+}
+
+func TestScheduler_TwiceDailyAt(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 17:05:00")
+	s.TwiceDailyAt(1, 17, 5)
+	assert.Equal(t, s.Next.Hour, 17)
+	assert.Equal(t, s.Next.Minute, 5)
+	assert.False(t, s.Next.Omit)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 01:04:00")
+	s.TwiceDailyAt(1, 17, 4)
+	assert.Equal(t, s.Next.Hour, 1)
+	assert.Equal(t, s.Next.Minute, 4)
+	assert.False(t, s.Next.Omit)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 03:02:00")
+	s.TwiceDailyAt(1, 17, 2)
 	assert.Equal(t, s.Next.Hour, 0)
 	assert.Equal(t, s.Next.Minute, 0)
 	assert.True(t, s.Next.Omit)
