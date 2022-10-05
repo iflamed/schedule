@@ -705,3 +705,15 @@ func TestScheduler_When(t *testing.T) {
 	})
 	assert.True(t, s.limit.When(s.ctx))
 }
+
+func TestScheduler_Call(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	dayTime := s.now.Format("15:04")
+	ch := make(chan bool, 1)
+	s.DailyAt(dayTime).When(func(ctx context.Context) bool {
+		return true
+	}).Call(NewDefaultTask(func(ctx context.Context) {
+		ch <- true
+	}))
+	assert.True(t, <-ch)
+}
