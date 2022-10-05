@@ -203,3 +203,104 @@ func TestScheduler_checkLimit(t *testing.T) {
 		})
 	}
 }
+
+func TestScheduler_EveryMinute(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	var marked bool
+	ch := make(chan bool, 1)
+	s.EveryMinute().CallFunc(func(ctx context.Context) {
+		marked = true
+		ch <- true
+	})
+	<-ch
+	assert.True(t, marked)
+}
+
+func TestScheduler_EveryTwoMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:30:01")
+	s.EveryTwoMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryTwoMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_EveryThreeMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:30:01")
+	s.EveryThreeMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryThreeMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_EveryFourMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:28:01")
+	s.EveryFourMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryFourMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_EveryFiveMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:30:01")
+	s.EveryFiveMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryFiveMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_EveryTenMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:30:01")
+	s.EveryTenMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryTenMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_EveryFifteenMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:30:01")
+	s.EveryFifteenMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryFifteenMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_EveryThirtyMinutes(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:30:01")
+	s.EveryThirtyMinutes()
+	assert.Equal(t, s.Next.Minute, s.now.Minute())
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:31:01")
+	s.EveryThirtyMinutes()
+	assert.NotEqual(t, s.Next.Minute, s.now.Minute())
+}
+
+func TestScheduler_Hourly(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:00:00")
+	s.Hourly()
+	assert.Equal(t, s.Next.Minute, 0)
+	assert.Equal(t, s.Next.Hour, 15)
+}
+
+func TestScheduler_HourlyAt(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:00:00")
+	s.HourlyAt(0, 1)
+	assert.Equal(t, s.Next.Minute, 0)
+	s.now, _ = time.Parse("2006-01-02 15:04:05", "2022-10-05 15:03:00")
+	s.HourlyAt(0, 1, 2, 3)
+	assert.Equal(t, s.Next.Hour, 15)
+	assert.Equal(t, s.Next.Minute, 3)
+}
