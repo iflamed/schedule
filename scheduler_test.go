@@ -598,3 +598,110 @@ func TestScheduler_YearlyOn(t *testing.T) {
 	assert.Equal(t, s.Next.Minute, 0)
 	assert.True(t, s.Next.Omit)
 }
+
+func TestScheduler_Weekdays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Weekdays()
+	assert.Len(t, s.limit.DaysOfWeek, 5)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Monday)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Tuesday)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Wednesday)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Thursday)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Friday)
+	assert.NotContains(t, s.limit.DaysOfWeek, time.Saturday)
+	assert.NotContains(t, s.limit.DaysOfWeek, time.Sunday)
+}
+
+func TestScheduler_Weekends(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Weekends()
+	assert.Len(t, s.limit.DaysOfWeek, 2)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Saturday)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Sunday)
+}
+
+func TestScheduler_Mondays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Mondays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Monday)
+}
+
+func TestScheduler_Tuesdays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Tuesdays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Tuesday)
+}
+
+func TestScheduler_Wednesdays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Wednesdays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Wednesday)
+}
+
+func TestScheduler_Thursdays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Thursdays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Thursday)
+}
+
+func TestScheduler_Fridays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Fridays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Friday)
+}
+
+func TestScheduler_Saturdays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Saturdays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Saturday)
+}
+
+func TestScheduler_Sundays(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Sundays()
+	assert.Len(t, s.limit.DaysOfWeek, 1)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Sunday)
+}
+
+func TestScheduler_Days(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Days(time.Monday, time.Friday)
+	assert.Len(t, s.limit.DaysOfWeek, 2)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Monday)
+	assert.Contains(t, s.limit.DaysOfWeek, time.Friday)
+	assert.NotContains(t, s.limit.DaysOfWeek, time.Wednesday)
+}
+
+func TestScheduler_Between(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.Between("09:00", "15:00")
+	assert.Equal(t, "09:00", s.limit.StartTime)
+	assert.Equal(t, "15:00", s.limit.EndTime)
+	assert.True(t, s.limit.IsBetween)
+}
+
+func TestScheduler_UnlessBetween(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.UnlessBetween("09:00", "15:00")
+	assert.Equal(t, "09:00", s.limit.StartTime)
+	assert.Equal(t, "15:00", s.limit.EndTime)
+	assert.False(t, s.limit.IsBetween)
+}
+
+func TestScheduler_When(t *testing.T) {
+	s := NewScheduler(context.Background(), time.UTC)
+	s.When(func(ctx context.Context) bool {
+		return false
+	})
+	assert.False(t, s.limit.When(s.ctx))
+	s.When(func(ctx context.Context) bool {
+		return true
+	})
+	assert.True(t, s.limit.When(s.ctx))
+}
