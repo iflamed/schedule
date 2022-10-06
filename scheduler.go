@@ -22,6 +22,7 @@ type Scheduler struct {
 	log      Logger
 }
 
+// NewScheduler create instance of scheduler with context and default time.location
 func NewScheduler(ctx context.Context, loc *time.Location) *Scheduler {
 	return &Scheduler{
 		ctx:      ctx,
@@ -34,11 +35,14 @@ func NewScheduler(ctx context.Context, loc *time.Location) *Scheduler {
 	}
 }
 
+// Timezone set timezone with a new time.Location instance
+// after `Call` and `CallFunc` method called, the current time will roll back to default location.
 func (s *Scheduler) Timezone(loc *time.Location) *Scheduler {
 	s.now = s.now.In(loc)
 	return s
 }
 
+// SetLogger set a new logger
 func (s *Scheduler) SetLogger(l Logger) *Scheduler {
 	if l == nil {
 		return s
@@ -47,6 +51,7 @@ func (s *Scheduler) SetLogger(l Logger) *Scheduler {
 	return s
 }
 
+// Start wait all task to be finished
 func (s *Scheduler) Start() {
 	if atomic.LoadInt32(&s.count) > 0 {
 		s.log.Debugf("Wait for %d tasks finish... \n", s.count)
@@ -55,6 +60,7 @@ func (s *Scheduler) Start() {
 	s.log.Debug("All tasks have been finished.")
 }
 
+// Call call a task
 func (s *Scheduler) Call(t Task) {
 	defer s.Timezone(s.location)
 	if !s.isTimeMatched() {
@@ -77,6 +83,7 @@ func (s *Scheduler) Call(t Task) {
 	}()
 }
 
+// CallFunc call a task function
 func (s *Scheduler) CallFunc(fn TaskFunc) {
 	s.Call(NewDefaultTask(fn))
 }
