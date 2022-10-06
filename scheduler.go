@@ -39,6 +39,14 @@ func (s *Scheduler) Timezone(loc *time.Location) *Scheduler {
 	return s
 }
 
+func (s *Scheduler) Start() {
+	if atomic.LoadInt32(&s.count) > 0 {
+		log.Printf("Wait for %d tasks finish... \n", s.count)
+	}
+	s.wg.Wait()
+	log.Println("All tasks have been finished.")
+}
+
 func (s *Scheduler) Call(t Task) {
 	defer s.Timezone(time.UTC)
 	if !s.isTimeMatched() {

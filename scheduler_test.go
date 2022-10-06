@@ -192,6 +192,22 @@ func TestScheduler_checkLimit(t *testing.T) {
 			},
 			want: true,
 		},
+		{
+			name: "in time limit",
+			fields: fields{
+				now: now,
+				limit: &Limit{
+					DaysOfWeek: []time.Weekday{},
+					StartTime:  "23:59",
+					EndTime:    "00:00",
+					IsBetween:  false,
+					When: func(ctx context.Context) bool {
+						return true
+					},
+				},
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -748,4 +764,25 @@ func TestScheduler_Call(t *testing.T) {
 		ch <- true
 	}))
 	assert.True(t, <-ch)
+	var mark bool
+	s.DailyAt(dayTime).When(func(ctx context.Context) bool {
+		return false
+	}).CallFunc(func(ctx context.Context) {
+		mark = true
+		return
+	})
+	assert.False(t, mark)
+	s.YearlyOn(12, 31, dayTime).CallFunc(func(ctx context.Context) {
+		mark = true
+		return
+	})
+	assert.False(t, mark)
+	s.DailyAt(dayTime).When(func(ctx context.Context) bool {
+		return true
+	}).Call(NewDefaultTask(func(ctx context.Context) {
+		mark = true
+		panic("task panic")
+	}))
+	s.Start()
+	assert.True(t, mark)
 }
