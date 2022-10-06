@@ -35,7 +35,6 @@ func NewScheduler(ctx context.Context, loc *time.Location) *Scheduler {
 }
 
 func (s *Scheduler) Timezone(loc *time.Location) *Scheduler {
-	s.location = loc
 	s.now = s.now.In(loc)
 	return s
 }
@@ -57,7 +56,7 @@ func (s *Scheduler) Start() {
 }
 
 func (s *Scheduler) Call(t Task) {
-	defer s.Timezone(time.UTC)
+	defer s.Timezone(s.location)
 	if !s.isTimeMatched() {
 		return
 	}
