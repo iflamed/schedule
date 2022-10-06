@@ -122,8 +122,8 @@ Method  | Description
 `Fridays()`  |  Limit the task to Friday
 `Saturdays()`  |  Limit the task to Saturday
 `Days(d ...time.Weekday)`  |  Limit the task to specific days
-`Between(start, end string)`  |  Limit the task to run between start and end times
-`UnlessBetween(start, end string)`  |  Limit the task to not run between start and end times
+`Between(start, end string)`  |  Limit the task to run between start and end time
+`UnlessBetween(start, end string)`  |  Limit the task to not run between start and end time
 `When(when WhenFunc)`  |  Limit the task based on a truth test
 
 ### Schedule example

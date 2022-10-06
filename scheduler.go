@@ -1,4 +1,5 @@
 // Package schedule
+// The core code of scheduler, contain frequency options and constraints.
 package schedule
 
 import (
@@ -11,6 +12,7 @@ import (
 	"time"
 )
 
+// Scheduler The core scheduler struct
 type Scheduler struct {
 	location *time.Location
 	now      time.Time
@@ -168,12 +170,14 @@ func (s *Scheduler) initNextTick() {
 	}
 }
 
+// EveryMinute run task every minutes
 func (s *Scheduler) EveryMinute() *Scheduler {
 	s.initNextTick()
 	s.Next.Minute = s.now.Minute()
 	return s
 }
 
+// EveryTwoMinutes run task every two minutes
 func (s *Scheduler) EveryTwoMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -183,6 +187,7 @@ func (s *Scheduler) EveryTwoMinutes() *Scheduler {
 	return s
 }
 
+// EveryThreeMinutes run task every three minutes
 func (s *Scheduler) EveryThreeMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -192,6 +197,7 @@ func (s *Scheduler) EveryThreeMinutes() *Scheduler {
 	return s
 }
 
+// EveryFourMinutes run task every four minutes
 func (s *Scheduler) EveryFourMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -201,6 +207,7 @@ func (s *Scheduler) EveryFourMinutes() *Scheduler {
 	return s
 }
 
+// EveryFiveMinutes run task every five minutes
 func (s *Scheduler) EveryFiveMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -210,6 +217,7 @@ func (s *Scheduler) EveryFiveMinutes() *Scheduler {
 	return s
 }
 
+// EveryTenMinutes run the task every ten minutes
 func (s *Scheduler) EveryTenMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -219,6 +227,7 @@ func (s *Scheduler) EveryTenMinutes() *Scheduler {
 	return s
 }
 
+// EveryFifteenMinutes run the task every fifteen minutes
 func (s *Scheduler) EveryFifteenMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -228,6 +237,7 @@ func (s *Scheduler) EveryFifteenMinutes() *Scheduler {
 	return s
 }
 
+// EveryThirtyMinutes run the task every thirty minutes
 func (s *Scheduler) EveryThirtyMinutes() *Scheduler {
 	s.initNextTick()
 	minute := s.now.Minute()
@@ -237,11 +247,13 @@ func (s *Scheduler) EveryThirtyMinutes() *Scheduler {
 	return s
 }
 
+// Hourly run the task every hour
 func (s *Scheduler) Hourly() *Scheduler {
 	s.initNextTick()
 	return s
 }
 
+// HourlyAt run the task every hour at some minutes past the hour
 func (s *Scheduler) HourlyAt(t ...int) *Scheduler {
 	s.initNextTick()
 	s.Next.Omit = true
@@ -256,6 +268,7 @@ func (s *Scheduler) HourlyAt(t ...int) *Scheduler {
 	return s
 }
 
+// EveryOddHour run the task every odd hour
 func (s *Scheduler) EveryOddHour() *Scheduler {
 	s.initNextTick()
 	s.Next.Omit = true
@@ -276,36 +289,42 @@ func (s *Scheduler) setHourlyInterval(n int) {
 	}
 }
 
+// EveryTwoHours run the task every two hours
 func (s *Scheduler) EveryTwoHours() *Scheduler {
 	s.initNextTick()
 	s.setHourlyInterval(2)
 	return s
 }
 
+// EveryThreeHours run the task every three hours
 func (s *Scheduler) EveryThreeHours() *Scheduler {
 	s.initNextTick()
 	s.setHourlyInterval(3)
 	return s
 }
 
+// EveryFourHours run the task every four hours
 func (s *Scheduler) EveryFourHours() *Scheduler {
 	s.initNextTick()
 	s.setHourlyInterval(4)
 	return s
 }
 
+// EveryFiveHours run the task every five hours
 func (s *Scheduler) EveryFiveHours() *Scheduler {
 	s.initNextTick()
 	s.setHourlyInterval(5)
 	return s
 }
 
+// EverySixHours run the task every six hours
 func (s *Scheduler) EverySixHours() *Scheduler {
 	s.initNextTick()
 	s.setHourlyInterval(6)
 	return s
 }
 
+// Daily run the task every day at midnight
 func (s *Scheduler) Daily() *Scheduler {
 	s.initNextTick()
 	s.Next.Hour = 0
@@ -336,10 +355,12 @@ func (s *Scheduler) setNextTime(t []string) {
 	}
 }
 
+// At run the task every day at some time (03:00 format), method alias of dailyAt
 func (s *Scheduler) At(t ...string) *Scheduler {
 	return s.DailyAt(t...)
 }
 
+// DailyAt run the task every day at some time (03:00 format)
 func (s *Scheduler) DailyAt(t ...string) *Scheduler {
 	s.initNextTick()
 	s.Next.Hour = 0
@@ -349,6 +370,7 @@ func (s *Scheduler) DailyAt(t ...string) *Scheduler {
 	return s
 }
 
+// TwiceDaily run the task daily at first and second hour
 func (s *Scheduler) TwiceDaily(first, second int) *Scheduler {
 	timeList := make([]string, 0, 2)
 	timeList = append(timeList, strconv.Itoa(first)+":00")
@@ -357,6 +379,8 @@ func (s *Scheduler) TwiceDaily(first, second int) *Scheduler {
 	return s
 }
 
+// TwiceDailyAt run the task daily at some time
+// TwiceDailyAt(1, 13, 15) run the task daily at 1:15 & 13:15
 func (s *Scheduler) TwiceDailyAt(first, second, offset int) *Scheduler {
 	timeList := make([]string, 0, 2)
 	timeList = append(timeList, strconv.Itoa(first)+":"+strconv.Itoa(offset))
@@ -365,6 +389,7 @@ func (s *Scheduler) TwiceDailyAt(first, second, offset int) *Scheduler {
 	return s
 }
 
+// Weekly run the task every Sunday at 00:00
 func (s *Scheduler) Weekly() *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	now = now.StartOfWeek()
@@ -378,6 +403,8 @@ func (s *Scheduler) Weekly() *Scheduler {
 	return s
 }
 
+// WeeklyOn run the task every week on a time
+// WeeklyOn(1, "8:00") run the task every week on Monday at 8:00
 func (s *Scheduler) WeeklyOn(d time.Weekday, t string) *Scheduler {
 	s.Next = &NextTick{
 		Year:   s.now.Year(),
@@ -394,6 +421,7 @@ func (s *Scheduler) WeeklyOn(d time.Weekday, t string) *Scheduler {
 	return s
 }
 
+// Monthly run the task on the first day of every month at 00:00
 func (s *Scheduler) Monthly() *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	now = now.StartOfMonth()
@@ -407,6 +435,8 @@ func (s *Scheduler) Monthly() *Scheduler {
 	return s
 }
 
+// MonthlyOn run the task every month on a time
+// MonthlyOn(4, "15:00") run the task every month on the 4th at 15:00
 func (s *Scheduler) MonthlyOn(d int, t string) *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	s.Next = &NextTick{
@@ -424,6 +454,8 @@ func (s *Scheduler) MonthlyOn(d int, t string) *Scheduler {
 	return s
 }
 
+// TwiceMonthly run the task monthly on some time
+// TwiceMonthly(1, 16, "13:00") run the task monthly on the 1st and 16th at 13:00
 func (s *Scheduler) TwiceMonthly(b, e int, t string) *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	s.Next = &NextTick{
@@ -442,6 +474,8 @@ func (s *Scheduler) TwiceMonthly(b, e int, t string) *Scheduler {
 	return s
 }
 
+// LastDayOfMonth run the task on the last day of the month at a time
+// LastDayOfMonth("15:00") run the task on the last day of the month at 15:00
 func (s *Scheduler) LastDayOfMonth(t string) *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	s.Next = &NextTick{
@@ -458,6 +492,7 @@ func (s *Scheduler) LastDayOfMonth(t string) *Scheduler {
 	return s
 }
 
+// Quarterly Run the task on the first day of every quarter at 00:00
 func (s *Scheduler) Quarterly() *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	qs := now.StartOfQuarter()
@@ -471,6 +506,7 @@ func (s *Scheduler) Quarterly() *Scheduler {
 	return s
 }
 
+// Yearly run the task on the first day of every year at 00:00
 func (s *Scheduler) Yearly() *Scheduler {
 	s.Next = &NextTick{
 		Year:   s.now.Year(),
@@ -482,6 +518,8 @@ func (s *Scheduler) Yearly() *Scheduler {
 	return s
 }
 
+// YearlyOn Run the task every year on a time
+// YearlyOn(6, 1, "17:00") run the task every year on June 1st at 17:00
 func (s *Scheduler) YearlyOn(m, d int, t string) *Scheduler {
 	now := carbon.Time2Carbon(s.now)
 	s.Next = &NextTick{
@@ -504,6 +542,7 @@ func (s *Scheduler) YearlyOn(m, d int, t string) *Scheduler {
 	return s
 }
 
+// Weekdays limit the task to weekdays
 func (s *Scheduler) Weekdays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -516,6 +555,7 @@ func (s *Scheduler) Weekdays() *Scheduler {
 	return s
 }
 
+// Weekends limit the task to weekends
 func (s *Scheduler) Weekends() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -525,6 +565,7 @@ func (s *Scheduler) Weekends() *Scheduler {
 	return s
 }
 
+// Mondays limit the task to Monday
 func (s *Scheduler) Mondays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -533,6 +574,7 @@ func (s *Scheduler) Mondays() *Scheduler {
 	return s
 }
 
+// Tuesdays limit the task to Tuesday
 func (s *Scheduler) Tuesdays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -541,6 +583,7 @@ func (s *Scheduler) Tuesdays() *Scheduler {
 	return s
 }
 
+// Wednesdays limit the task to Wednesday
 func (s *Scheduler) Wednesdays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -549,6 +592,7 @@ func (s *Scheduler) Wednesdays() *Scheduler {
 	return s
 }
 
+// Thursdays limit the task to Thursday
 func (s *Scheduler) Thursdays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -557,6 +601,7 @@ func (s *Scheduler) Thursdays() *Scheduler {
 	return s
 }
 
+// Fridays limit the task to Friday
 func (s *Scheduler) Fridays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -565,6 +610,7 @@ func (s *Scheduler) Fridays() *Scheduler {
 	return s
 }
 
+// Saturdays limit the task to Saturday
 func (s *Scheduler) Saturdays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -573,6 +619,7 @@ func (s *Scheduler) Saturdays() *Scheduler {
 	return s
 }
 
+// Sundays limit the task to Sunday
 func (s *Scheduler) Sundays() *Scheduler {
 	s.limit.DaysOfWeek = append(
 		s.limit.DaysOfWeek,
@@ -581,11 +628,13 @@ func (s *Scheduler) Sundays() *Scheduler {
 	return s
 }
 
+// Days limit the task to specific days
 func (s *Scheduler) Days(d ...time.Weekday) *Scheduler {
 	s.limit.DaysOfWeek = append(s.limit.DaysOfWeek, d...)
 	return s
 }
 
+// Between limit the task to run between start and end time
 func (s *Scheduler) Between(start, end string) *Scheduler {
 	s.limit.StartTime = start
 	s.limit.EndTime = end
@@ -593,6 +642,7 @@ func (s *Scheduler) Between(start, end string) *Scheduler {
 	return s
 }
 
+// UnlessBetween limit the task to not run between start and end time
 func (s *Scheduler) UnlessBetween(start, end string) *Scheduler {
 	s.limit.StartTime = start
 	s.limit.EndTime = end
@@ -600,6 +650,7 @@ func (s *Scheduler) UnlessBetween(start, end string) *Scheduler {
 	return s
 }
 
+// When limit the task based on a truth test
 func (s *Scheduler) When(when WhenFunc) *Scheduler {
 	s.limit.When = when
 	return s
