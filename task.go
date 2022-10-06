@@ -3,11 +3,18 @@ package schedule
 
 import (
 	"context"
+	"log"
 	"time"
 )
 
 type Task interface {
 	Run(ctx context.Context)
+}
+
+type Logger interface {
+	Error(msg string, e any)
+	Debugf(msg string, n int32)
+	Debug(msg string)
 }
 
 type TaskFunc func(ctx context.Context)
@@ -40,4 +47,19 @@ type Limit struct {
 	EndTime    string
 	IsBetween  bool
 	When       WhenFunc
+}
+
+type DefaultLogger struct {
+}
+
+func (d *DefaultLogger) Error(msg string, r any) {
+	log.Println(msg, r)
+}
+
+func (d *DefaultLogger) Debug(msg string) {
+	log.Println(msg)
+}
+
+func (d *DefaultLogger) Debugf(msg string, i int32) {
+	log.Printf(msg, i)
 }

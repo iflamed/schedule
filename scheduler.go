@@ -4,7 +4,6 @@ package schedule
 import (
 	"context"
 	"github.com/golang-module/carbon/v2"
-	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,6 +19,7 @@ type Scheduler struct {
 	Next     *NextTick
 	limit    *Limit
 	count    int32
+	log      Logger
 }
 
 func NewScheduler(ctx context.Context, loc *time.Location) *Scheduler {
@@ -30,6 +30,7 @@ func NewScheduler(ctx context.Context, loc *time.Location) *Scheduler {
 		Next:     &NextTick{},
 		limit:    &Limit{},
 		count:    0,
+		log:      &DefaultLogger{},
 	}
 }
 
@@ -39,12 +40,20 @@ func (s *Scheduler) Timezone(loc *time.Location) *Scheduler {
 	return s
 }
 
+func (s *Scheduler) SetLogger(l Logger) *Scheduler {
+	if l == nil {
+		return s
+	}
+	s.log = l
+	return s
+}
+
 func (s *Scheduler) Start() {
 	if atomic.LoadInt32(&s.count) > 0 {
-		log.Printf("Wait for %d tasks finish... \n", s.count)
+		s.log.Debugf("Wait for %d tasks finish... \n", s.count)
 	}
 	s.wg.Wait()
-	log.Println("All tasks have been finished.")
+	s.log.Debug("All tasks have been finished.")
 }
 
 func (s *Scheduler) Call(t Task) {
@@ -62,7 +71,7 @@ func (s *Scheduler) Call(t Task) {
 			s.wg.Done()
 			atomic.AddInt32(&s.count, -1)
 			if r := recover(); r != nil {
-				log.Println("Recovering schedule task from panic:", r)
+				s.log.Error("Recovering schedule task from panic:", r)
 			}
 		}()
 		t.Run(s.ctx)

@@ -756,6 +756,7 @@ func TestScheduler_When(t *testing.T) {
 
 func TestScheduler_Call(t *testing.T) {
 	s := NewScheduler(context.Background(), time.UTC)
+	s.SetLogger(nil).SetLogger(&DefaultLogger{})
 	dayTime := s.now.Format("15:04")
 	ch := make(chan bool, 1)
 	s.DailyAt(dayTime).When(func(ctx context.Context) bool {
